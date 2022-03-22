@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/shopping_list_screen.dart';
+import './screens/shopping_item_screen.dart';
+import 'dbhelper.dart';
 
 void main() => runApp(const MyApp());
 
@@ -14,6 +16,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const ShopingListScreen(),
+        ShoppingItemScreen.routeName: (context) => const ShoppingItemScreen(),
       },
       theme: ThemeData(
         colorScheme: const ColorScheme.light(

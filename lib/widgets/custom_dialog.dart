@@ -19,11 +19,10 @@ class CustomDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      scrollable: true,
       title: Text(title),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: children,
-        ),
+      content: ListBody(
+        children: children,
       ),
       actions: <Widget>[
         TextIconButton(

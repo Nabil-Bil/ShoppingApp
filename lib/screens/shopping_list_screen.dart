@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../dbhelper.dart';
 import '../models/shopping_list.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/shopping_list_item.dart';
 import '../widgets/custom_dialog.dart';
+import '../widgets/custom_toast.dart';
 
 class ShopingListScreen extends StatefulWidget {
   const ShopingListScreen({Key? key}) : super(key: key);
@@ -16,15 +18,16 @@ class _ShopingListScreenState extends State<ShopingListScreen> {
   @override
   Widget build(BuildContext context) {
     final allLists = DbHelper().getLists;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shoping List'),
+        title: const Text('Shopping List'),
       ),
       body: FutureBuilder(
         future: allLists,
         builder: (context, AsyncSnapshot<List> snapshot) {
-          if (!snapshot.hasData) {
-            return Container();
+          if (snapshot.data!.isEmpty) {
+            return Center(child: Image.asset("assets/icons/noItem.png"));
           }
 
           return ListView.builder(
@@ -59,33 +62,35 @@ class _ShopingListScreenState extends State<ShopingListScreen> {
                     title: 'Add Shopping List',
                     children: <Widget>[
                       CustomTextField(
-                          title: 'Name',
-                          controller: name,
-                          keyboardType: TextInputType.name),
+                        title: 'Name',
+                        controller: name,
+                        maxLength: 20,
+                      ),
                       CustomTextField(
-                          title: 'Priority',
-                          controller: priority,
-                          keyboardType: TextInputType.number)
+                        title: 'Priority',
+                        controller: priority,
+                        keyboardType: TextInputType.number,
+                      )
                     ],
                     onPressed: () {
                       setState(() {
                         if (priority.text == '' || name.text == '') {
-                          const snackBar = SnackBar(
-                            content: Text('Invalid Inputs.Retry'),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        } else if (int.tryParse(priority.text) == null) {
-                          const snackBar = SnackBar(
-                            content: Text('Priority must be an integer'),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                          showToast("Invalid Inputs! Retry");
+                        } else if (int.tryParse(priority.text) == null ||
+                            int.parse(priority.text) <= 0) {
+                          showToast("Priority must be a positive integer");
                         } else {
-                          DbHelper().insertList(ShoppingList(
+                          DbHelper().insertList(
+                            ShoppingList(
                               id: 0,
                               name: name.text,
-                              priority: (int.parse(priority.text))));
+                              priority: (int.parse(
+                                priority.text,
+                              )),
+                            ),
+                          );
+                          Navigator.pop(context);
                         }
-                        Navigator.pop(context);
                       });
                     },
                     titleButton: 'Add',

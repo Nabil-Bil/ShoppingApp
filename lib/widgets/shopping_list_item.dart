@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'custom_toast.dart';
 import '../models/shopping_list.dart';
-
 import 'custom_dialog.dart';
 import 'custom_text_field.dart';
+import '../screens/shopping_item_screen.dart';
 
 class ShoppingListItem extends StatelessWidget {
   final ShoppingList listItem;
@@ -20,9 +21,14 @@ class ShoppingListItem extends StatelessWidget {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        child: Text('${listItem.priority}'),
+        child: FittedBox(
+          child: Text('${listItem.priority}'),
+        ),
       ),
-      title: Text(listItem.name),
+      title: Text(
+        listItem.name,
+        overflow: TextOverflow.ellipsis,
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -38,34 +44,34 @@ class ShoppingListItem extends StatelessWidget {
                     title: 'Edit',
                     children: <Widget>[
                       CustomTextField(
-                          title: 'Name',
-                          controller: name,
-                          keyboardType: TextInputType.text),
+                        title: 'Name',
+                        controller: name,
+                        maxLength: 20,
+                      ),
                       CustomTextField(
-                          title: 'Priority',
-                          controller: priority,
-                          keyboardType: TextInputType.number)
+                        title: 'Priority',
+                        controller: priority,
+                        keyboardType: TextInputType.number,
+                      )
                     ],
                     onPressed: () {
                       if (priority.text == '' || name.text == '') {
-                        const snackBar = SnackBar(
-                          content: Text('Invalid Inputs.Retry'),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        showToast("Invalid Inputs! Retry");
                       } else if (int.tryParse(priority.text) == null ||
                           int.parse(priority.text) <= 0) {
-                        const snackBar = SnackBar(
-                          content: Text('Priority must be a positive integer'),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        showToast("Priority must be a positive integer");
                       } else {
-                        handlerEdit(ShoppingList(
-                            id: listItem.id,
-                            name: name.text,
-                            priority: int.parse(priority.text)));
+                        if (int.parse(priority.text) == listItem.priority &&
+                            name.text == listItem.name) {
+                          Navigator.pop(context);
+                        } else {
+                          handlerEdit(ShoppingList(
+                              id: listItem.id,
+                              name: name.text,
+                              priority: int.parse(priority.text)));
+                          Navigator.pop(context);
+                        }
                       }
-
-                      Navigator.pop(context);
                     },
                     titleButton: 'Edit',
                     iconButton: Icons.edit,
@@ -86,7 +92,10 @@ class ShoppingListItem extends StatelessWidget {
               )),
         ],
       ),
-      onTap: () {},
+      onTap: () {
+        Navigator.of(context)
+            .pushNamed(ShoppingItemScreen.routeName, arguments: listItem);
+      },
     );
   }
 }
